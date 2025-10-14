@@ -7,7 +7,8 @@ import { BalanceCard } from '@/components/balance-card'
 import { OpportunityCard } from '@/components/opportunity-card'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ArbitrageOpportunity } from '@/types'
-import { Bot, TrendingUp, Zap } from 'lucide-react'
+import { Bot, TrendingUp, Zap, MessageCircle } from 'lucide-react'
+import Link from 'next/link'
 
 // Mock data - will be replaced with real data
 const mockOpportunities: ArbitrageOpportunity[] = [
@@ -99,7 +100,16 @@ export default function Home() {
               <Bot className="h-8 w-8 text-blue-600" />
               <h1 className="text-xl font-bold">ArbitrageAI</h1>
             </div>
-            <WalletConnect />
+            <div className="flex items-center gap-4">
+              <Link 
+                href="/chat"
+                className="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+              >
+                <MessageCircle className="h-5 w-5" />
+                <span>ASI:One Chat</span>
+              </Link>
+              <WalletConnect />
+            </div>
           </div>
         </div>
       </header>
