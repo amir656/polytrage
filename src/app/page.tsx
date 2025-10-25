@@ -5,47 +5,121 @@ import { useAccount } from 'wagmi'
 import { WalletConnect } from '@/components/wallet-connect'
 import { BalanceCard } from '@/components/balance-card'
 import { OpportunityCard } from '@/components/opportunity-card'
+import { CrossMarketOpportunityCard } from '@/components/cross-market-opportunity-card'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ArbitrageOpportunity } from '@/types'
+import { CrossMarketOpportunity } from '@/lib/multi-market-arbitrage'
 import { Bot, TrendingUp, Zap, MessageCircle } from 'lucide-react'
 import Link from 'next/link'
 
-// Mock data - will be replaced with real data
-const mockOpportunities: ArbitrageOpportunity[] = [
+// Mock cross-market arbitrage opportunities
+const mockCrossMarketOpportunities: CrossMarketOpportunity[] = [
   {
     id: '1',
-    market: 'BTC > $100k by Dec 31',
+    market: 'Will Bitcoin reach $100,000 by December 31, 2024?',
     marketOdds: 75,
-    oraclePrice: 98500,
-    impliedPrice: 133333,
-    profitMargin: 6.2,
-    confidence: 85,
-    detectedAt: new Date(Date.now() - 300000), // 5 minutes ago
-    status: 'pending'
+    oraclePrice: 0.75,
+    impliedPrice: 0.78,
+    profitMargin: 3.2,
+    confidence: 92,
+    detectedAt: new Date(Date.now() - 300000),
+    status: 'pending',
+    buyMarket: {
+      platform: 'polymarket',
+      eventId: 'btc-100k-2024',
+      question: 'Will Bitcoin reach $100,000 by December 31, 2024?',
+      outcome: 'YES',
+      odds: 75,
+      price: 0.75,
+      volume: 1250000,
+      resolutionDate: new Date('2024-12-31'),
+      lastUpdated: new Date()
+    },
+    sellMarket: {
+      platform: 'augur',
+      eventId: 'btc-reach-100k',
+      question: 'Bitcoin to reach $100k by end of 2024?',
+      outcome: 'YES',
+      odds: 78,
+      price: 0.78,
+      volume: 850000,
+      resolutionDate: new Date('2024-12-31'),
+      lastUpdated: new Date()
+    },
+    spreadPercent: 4.0,
+    returnAnalysis: {
+      rawReturn: 3.2,
+      timeToResolution: 68,
+      annualizedReturn: 18.2,
+      sp500Benchmark: 20.8,
+      beatsBenchmark: false,
+      riskAdjustedScore: 16.7,
+      timeCategory: 'short'
+    },
+    eventMatching: {
+      confidence: 92,
+      keywords: ['bitcoin', '100k', '2024', 'reach']
+    }
   },
   {
     id: '2',
-    market: 'ETH > $5k by Dec 31',
-    marketOdds: 60,
-    oraclePrice: 3800,
-    impliedPrice: 8333,
-    profitMargin: 4.8,
-    confidence: 72,
-    detectedAt: new Date(Date.now() - 600000), // 10 minutes ago
-    status: 'pending'
+    market: 'Trump wins 2024 presidential election',
+    marketOdds: 45,
+    oraclePrice: 0.43,
+    impliedPrice: 0.45,
+    profitMargin: 1.7,
+    confidence: 88,
+    detectedAt: new Date(Date.now() - 600000),
+    status: 'pending',
+    buyMarket: {
+      platform: 'augur',
+      eventId: 'us-election-trump',
+      question: 'Trump wins 2024 presidential election',
+      outcome: 'YES',
+      odds: 43,
+      price: 0.43,
+      volume: 3200000,
+      resolutionDate: new Date('2024-11-06'),
+      lastUpdated: new Date()
+    },
+    sellMarket: {
+      platform: 'polymarket',
+      eventId: 'trump-wins-2024',
+      question: 'Will Donald Trump win the 2024 US Presidential Election?',
+      outcome: 'YES',
+      odds: 45,
+      price: 0.45,
+      volume: 5000000,
+      resolutionDate: new Date('2024-11-06'),
+      lastUpdated: new Date()
+    },
+    spreadPercent: 4.7,
+    returnAnalysis: {
+      rawReturn: 1.7,
+      timeToResolution: 12,
+      annualizedReturn: 57.3,
+      sp500Benchmark: 50,
+      beatsBenchmark: true,
+      riskAdjustedScore: 50.4,
+      timeCategory: 'short'
+    },
+    eventMatching: {
+      confidence: 88,
+      keywords: ['trump', '2024', 'election', 'wins']
+    }
   }
 ]
 
 export default function Home() {
   const { isConnected, address } = useAccount()
-  const [opportunities, setOpportunities] = useState<ArbitrageOpportunity[]>(mockOpportunities)
+  const [crossMarketOpportunities, setCrossMarketOpportunities] = useState<CrossMarketOpportunity[]>(mockCrossMarketOpportunities)
   const [executingTrade, setExecutingTrade] = useState<string | null>(null)
 
   const handleExecuteTrade = async (opportunityId: string) => {
     setExecutingTrade(opportunityId)
     // Simulate trade execution
     setTimeout(() => {
-      setOpportunities(prev => 
+      setCrossMarketOpportunities(prev => 
         prev.map(opp => 
           opp.id === opportunityId 
             ? { ...opp, status: 'executed' as const }
@@ -74,15 +148,15 @@ export default function Home() {
             <div className="mt-6 space-y-2 text-sm text-muted-foreground">
               <div className="flex items-center gap-2">
                 <TrendingUp className="h-4 w-4" />
-                <span>Multi-agent arbitrage detection</span>
+                <span>Cross-market arbitrage detection</span>
               </div>
               <div className="flex items-center gap-2">
                 <Zap className="h-4 w-4" />
-                <span>Automated execution via Vincent</span>
+                <span>Polymarket, Augur, PlotX price monitoring</span>
               </div>
               <div className="flex items-center gap-2">
                 <Bot className="h-4 w-4" />
-                <span>Powered by ASI Alliance & Pyth</span>
+                <span>Automated execution via Vincent</span>
               </div>
             </div>
           </CardContent>
@@ -127,14 +201,14 @@ export default function Home() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <TrendingUp className="h-5 w-5" />
-                  Live Arbitrage Opportunities
+                  Cross-Market Arbitrage Opportunities
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {opportunities.length > 0 ? (
+                {crossMarketOpportunities.length > 0 ? (
                   <div className="space-y-4">
-                    {opportunities.map((opportunity) => (
-                      <OpportunityCard
+                    {crossMarketOpportunities.map((opportunity) => (
+                      <CrossMarketOpportunityCard
                         key={opportunity.id}
                         opportunity={opportunity}
                         onExecute={handleExecuteTrade}
@@ -145,8 +219,8 @@ export default function Home() {
                 ) : (
                   <div className="text-center py-8 text-muted-foreground">
                     <Bot className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                    <p>No arbitrage opportunities detected</p>
-                    <p className="text-sm">Agents are scanning markets...</p>
+                    <p>No cross-market arbitrage opportunities detected</p>
+                    <p className="text-sm">Scanning Polymarket, Augur, and PlotX...</p>
                   </div>
                 )}
               </CardContent>
